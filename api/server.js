@@ -1,6 +1,7 @@
 // BUILD YOUR SERVER HERE
 
 const express = require("express");
+const { del } = require("express/lib/application");
 const User = require("./users/model");
 const server = express();
 server.use(express.json());
@@ -40,6 +41,7 @@ server.get("/api/users/:id", (req, res) => {
       });
     });
 });
+
 server.get("/api/users", (req, res) => {
   User.find()
     .then((users) => {
@@ -51,8 +53,17 @@ server.get("/api/users", (req, res) => {
       });
     });
 });
-server.use("*", (req, res) => {
-  res.status(404).json({ message: "not found" });
+
+server.delete("/api/users/:id", async (req, res) => {
+  const xUser = await User.findById(req.params.id);
+  if (!xUser) {
+    res.status(404).json({
+      message: "The user with the specified ID does not exist",
+    });
+  } else {
+    const delUser = await User.remove(xUser.id);
+    res.status(200).json(delUser);
+  }
 });
 
 module.exports = server; // EXPORT YOUR SERVER instead of {}
